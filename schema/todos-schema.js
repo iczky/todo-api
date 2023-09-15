@@ -22,28 +22,24 @@ const todoSchema = new Schema({
 });
 
 const userSchema = new Schema({
-    username: {
-        type: String,
-        required: true
+  username: {
+    type: String,
+    required: true,
+  },
+  password: {
+    type: String,
+  },
+  role: {
+    type: String,
+    enum: {
+      values: ['admin', 'user'],
+      message: '{VALUE} is not supported',
     },
-    password: {
-        type: String,
-        required: true
-    }, 
-    role: {
-        type: String,
-        enum: {
-            values: ['admin', 'user'],
-            message: '{VALUE} is not supported'
-        }
-    }
-})
+  },
+});
 
 //build the model
 const Todo = mongoose.model('Todos', todoSchema);
 const User = mongoose.model('Users', userSchema);
 
-export{
-    Todo,
-    User
-};
+export { Todo, User };
