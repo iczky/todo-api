@@ -37,9 +37,6 @@ const login = async (req, res) => {
 
   const user = await User.findOne({ username });
 
-  console.log(user, `===user====`);
-  console.log(JWT_SIGN);
-
   const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
   if (isPasswordCorrect) {

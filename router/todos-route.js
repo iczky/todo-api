@@ -6,6 +6,7 @@ import {
   getAllTodos,
   getByIdTodos,
 } from '../service/todos-service.js';
+import authorizationMiddleware from '../middleware/authorization-middleware.js';
 
 const todosRoute = Router();
 
@@ -16,12 +17,12 @@ todosRoute.post('/todos', postTodos);
 todosRoute.put('/todos/:id', updateTodos);
 
 //delete by id
-todosRoute.delete('/todos/:id', deleteTodos);
+todosRoute.delete('/todos/:id', authorizationMiddleware, deleteTodos);
 
 //get by id
 todosRoute.get('/todos/:id', getByIdTodos);
 
 //get all
-todosRoute.get('/todos', getAllTodos);
+todosRoute.get('/todos', authorizationMiddleware, getAllTodos);
 
 export default todosRoute;

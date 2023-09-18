@@ -1,0 +1,140 @@
+---
+openapi: 3.0.0
+info:
+  title: Todo list using Express.js
+  version: 1.0.0
+  description: Create todo list API with RBAC implementation
+servers:
+- url: http://localhost:3000
+  description: Development server
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Bearer with JWT token
+  schemas:
+    RegisterUser:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+      required:
+      - username
+    LoginUser:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+paths:
+  "/api/register":
+    post:
+      summary: Register new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/RegisterUser"
+      responses:
+        '200':
+          description: User Create account
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      _id:
+                        type: integer
+                      username:
+                        type: string
+                      password:
+                        type: string
+                      role:
+                        type: string
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  "/api/login":
+    post:
+      summary: Login User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/LoginUser"
+      responses:
+        '200':
+          description: Login Successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                      data:
+                        type: string
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+  "/api/todos":
+    get:
+      security:
+      - bearer: []
+      summary: Get all todo list
+      responses:
+        '200':
+          description: Get all todo list from all users
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: integer
+                        activity:
+                          type: string
+                        dueDate:
+                          type: string
+                        priority:
+                          type: string
+                        category:
+                          type: string
