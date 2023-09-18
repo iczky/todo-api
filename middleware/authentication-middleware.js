@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken';
 
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  const token = authHeader.split(' ')[1];
 
   if (!authHeader) {
     res.status(401).json({
@@ -11,6 +10,7 @@ const authMiddleware = (req, res, next) => {
     });
   } else {
     try {
+      const token = authHeader.split(' ')[1];
       jwt.verify(token, JWT_SIGN);
       next();
     } catch (error) {
