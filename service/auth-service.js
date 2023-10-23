@@ -1,7 +1,8 @@
 import { User } from "../schema/todos-schema.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { JWT_SIGN } from "../config/jwt.js";
+import { generateLoginToken } from "../utils/generateToken.js";
+import config from "../config/config.js";
 
 const register = async (req, res) => {
   const { username, password, role } = req.body;
@@ -38,24 +39,26 @@ const login = async (req, res) => {
   const user = await User.findOne({ username });
 
   if (user) {
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
-    if (isPasswordCorrect) {
-      const token = jwt.sign(
-        {
-          username: user.username,
-          id: user._id,
-          role: user.role,
-        },
-        JWT_SIGN
-      );
+    try {
+      const isPasswordCorrect = await bcrypt.compare(password, user.password);
+      if (isPasswordCorrect) {
+        const { accessToken, refreshToken } = generateLoginToken(user);
 
-      res.status(200).json({
-        message: "success login",
-        data: token,
-      });
-    } else {
+        res.cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          secure: false,
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        res.status(200).json({
+          message: "success login",
+          data: accessToken,
+        });
+      }
+    } catch (error) {
       res.status(400).json({
-        message: "Login Failed",
+        error: error.message,
+        message: "cant login/password is wrong",
       });
     }
   } else {
@@ -65,4 +68,19 @@ const login = async (req, res) => {
   }
 };
 
-export { register, login };
+const refresh = (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  console.log(refreshToken);
+  if (!refreshToken) return res.sendStatus(401); // No token provided
+  jwt.verify(refreshToken, config.refreshSecret, (err, user) => {
+    if (err) return res.sendStatus(403); // Invalid token
+    const accessToken = jwt.sign(
+      { username: user.username },
+      config.accessSecret,
+      { expiresIn: "15m" }
+    );
+    res.json({ accessToken });
+  });
+};
+
+export { register, login, refresh };

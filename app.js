@@ -1,18 +1,20 @@
-import 'dotenv/config';
-import express from 'express';
-import databaseMiddleware from './middleware/database-middleware.js';
-import todosRoute from './router/todos-route.js';
-import authRouter from './router/auth-route.js';
-import authMiddleware from './middleware/authentication-middleware.js';
+import "dotenv/config";
+import express from "express";
+import databaseMiddleware from "./middleware/database-middleware.js";
+import todosRoute from "./router/todos-route.js";
+import authRouter from "./router/auth-route.js";
+import authMiddleware from "./middleware/authentication-middleware.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 const port = 3000;
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(databaseMiddleware);
 
-app.use('/api/users', authRouter);
-app.use('/api', authMiddleware, todosRoute);
+app.use("/api/users", authRouter);
+app.use("/api", authMiddleware, todosRoute);
 
 app.use((err, req, res, next) => {
   res.status(err.status || 500).json({

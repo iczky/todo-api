@@ -1,28 +1,28 @@
-import { JWT_SIGN } from '../config/jwt.js';
-import jwt from 'jsonwebtoken';
+import config from "../config/config.js";
+import jwt from "jsonwebtoken";
 
 const authorizationMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader) {
     res.status(401).json({
-      message: 'Not Authorized',
+      message: "Not Authorized",
     });
   } else {
-    const token = authHeader.split(' ')[1];
+    const token = authHeader.split(" ")[1];
     try {
-      const decodeToken = jwt.verify(token, JWT_SIGN);
+      const decodeToken = jwt.verify(token, config.accessSecret);
 
-      if (decodeToken.role === 'admin') {
+      if (decodeToken.role === "admin") {
         next();
       } else {
         res.status(401).json({
-          message: 'Unauthorized',
+          message: "Unauthorized",
         });
       }
     } catch (error) {
       res.status(400).json({
-        message: 'error',
+        message: "error",
         error: error,
       });
     }
