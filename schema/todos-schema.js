@@ -2,6 +2,23 @@ import { Schema } from 'mongoose';
 import mongoose from 'mongoose';
 
 //define the schema
+const userSchema = new Schema({
+  username: {
+    type: String,
+    required: true,
+  },
+  password: {
+    type: String,
+  },
+  role: {
+    type: String,
+    enum: {
+      values: ['admin', 'user'],
+      message: '{VALUE} is not supported',
+    },
+  },
+});
+
 const todoSchema = new Schema({
   activity: {
     type: String,
@@ -19,22 +36,10 @@ const todoSchema = new Schema({
     type: String,
     enum: ['shopping', 'eating', 'studying', 'gaming', 'playing'],
   },
-});
-
-const userSchema = new Schema({
-  username: {
-    type: String,
-    required: true,
-  },
-  password: {
-    type: String,
-  },
-  role: {
-    type: String,
-    enum: {
-      values: ['admin', 'user'],
-      message: '{VALUE} is not supported',
-    },
+  createdBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    alias: '_id', // Use alias to rename the field to _id
   },
 });
 

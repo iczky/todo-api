@@ -1,7 +1,7 @@
-import { User } from '../schema/todos-schema.js';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { JWT_SIGN } from '../config/jwt.js';
+import { User } from "../schema/todos-schema.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { JWT_SIGN } from "../config/jwt.js";
 
 const register = async (req, res) => {
   const { username, password, role } = req.body;
@@ -17,16 +17,16 @@ const register = async (req, res) => {
       });
 
       res.status(200).json({
-        message: 'Successfully Registered',
+        message: "Successfully Registered",
         data: user,
       });
     } else {
-      throw new Error('Username already exist');
+      throw new Error("Username already exist");
     }
   } catch (error) {
     console.log(error, `==========error register=========`);
     res.status(400).json({
-      message: 'cant register',
+      message: "cant register",
       error: error.message,
     });
   }
@@ -37,25 +37,30 @@ const login = async (req, res) => {
 
   const user = await User.findOne({ username });
 
-  const isPasswordCorrect = await bcrypt.compare(password, user.password);
+  if (user) {
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (isPasswordCorrect) {
+      const token = jwt.sign(
+        {
+          username: user.username,
+          id: user._id,
+          role: user.role,
+        },
+        JWT_SIGN
+      );
 
-  if (isPasswordCorrect) {
-    const token = jwt.sign(
-      {
-        username: user.username,
-        id: user._id,
-        role: user.role,
-      },
-      JWT_SIGN
-    );
-
-    res.status(200).json({
-      message: 'success login',
-      data: token,
-    });
+      res.status(200).json({
+        message: "success login",
+        data: token,
+      });
+    } else {
+      res.status(400).json({
+        message: "Login Failed",
+      });
+    }
   } else {
     res.status(400).json({
-      message: 'Login Failed',
+      message: "Username is not available",
     });
   }
 };

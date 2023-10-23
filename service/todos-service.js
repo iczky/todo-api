@@ -1,20 +1,22 @@
-import { Todo } from '../schema/todos-schema.js';
+import { Todo } from "../schema/todos-schema.js";
 
 //post to-do-list
 const postTodos = async (req, res) => {
   const { activity, dueDate, priority, category } = req.body;
-  console.log({ activity, dueDate, priority, category });
+  const createdBy = req.user.id;
+  console.log(req.user);
   try {
     const todo = await Todo.insertMany({
       activity,
       dueDate,
       priority,
       category,
+      createdBy: createdBy,
     });
     console.log(`============Success insert===============`);
 
     res.status(200).json({
-      message: 'success',
+      message: "success",
       data: todo,
     });
   } catch (error) {
@@ -33,7 +35,7 @@ const updateTodos = async (req, res) => {
   try {
     const todo = await Todo.updateOne({ _id: id }, todoBody);
     res.status(200).json({
-      message: 'success',
+      message: "success",
       data: todo,
     });
   } catch (error) {
@@ -50,8 +52,9 @@ const deleteTodos = async (req, res) => {
   try {
     const todo = await Todo.findByIdAndDelete({ _id: id });
     res.status(200).json({
-      message: 'success',
+      message: "success",
       data: todo,
+      deletedBy: req.user.id,
     });
   } catch (error) {
     console.log(error, `=============error===========`);
@@ -69,13 +72,13 @@ const getByIdTodos = async (req, res) => {
     console.log(`===========Id Found=============`);
 
     res.status(200).json({
-      message: 'success',
+      message: "success",
       data: todo,
     });
   } catch (error) {
     console.log(error.message, `=============error===========`);
     res.status(400).json({
-      message: 'incorrect id',
+      message: "incorrect id",
     });
   }
 };
@@ -87,13 +90,13 @@ const getAllTodos = async (req, res) => {
     console.log(`============Success get all=========`);
 
     res.status(200).json({
-      message: 'success',
+      message: "success",
       data: todo,
     });
   } catch (error) {
     console.log(error, `============error==========`);
     res.status(400).json({
-      message: 'incorrect data',
+      message: "incorrect data",
     });
   }
 };

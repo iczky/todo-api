@@ -4,15 +4,12 @@ import databaseMiddleware from './middleware/database-middleware.js';
 import todosRoute from './router/todos-route.js';
 import authRouter from './router/auth-route.js';
 import authMiddleware from './middleware/authentication-middleware.js';
-import extractUser from './middleware/extractUser-middleware.js';
 
 const app = express();
 const port = 3000;
 
 app.use(express.json());
 app.use(databaseMiddleware);
-
-app.use(extractUser)
 
 app.use('/api/users', authRouter);
 app.use('/api', authMiddleware, todosRoute);

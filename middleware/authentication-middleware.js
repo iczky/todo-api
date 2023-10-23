@@ -1,5 +1,5 @@
 import { JWT_SIGN } from '../config/jwt.js';
-import jwt from 'jsonwebtoken';
+import jwt, { decode } from 'jsonwebtoken';
 
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -11,7 +11,10 @@ const authMiddleware = (req, res, next) => {
   } else {
     try {
       const token = authHeader.split(' ')[1];
-      jwt.verify(token, JWT_SIGN);
+      const decodeToken = jwt.verify(token, JWT_SIGN);
+      req.user = decodeToken
+
+      decodeToken
       next();
     } catch (error) {
       res.status(400).json({
