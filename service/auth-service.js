@@ -1,7 +1,7 @@
 import { User } from "../schema/todos-schema.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { generateLoginToken } from "../utils/generateToken.js";
+import { generateToken } from "../utils/generateToken.js";
 import config from "../config/config.js";
 
 const register = async (req, res) => {
@@ -42,17 +42,21 @@ const login = async (req, res) => {
     try {
       const isPasswordCorrect = await bcrypt.compare(password, user.password);
       if (isPasswordCorrect) {
-        const { accessToken, refreshToken } = generateLoginToken(user);
+        const { accessToken, refreshToken, accessExpire, refreshExpire } =
+          generateToken(user);
 
         res.cookie("refreshToken", refreshToken, {
           httpOnly: true,
-          secure: false,
-          maxAge: 7 * 24 * 60 * 60 * 1000,
+          expire: refreshExpire,
+        });
+
+        res.cookie("accessToken", accessToken, {
+          httpOnly: true,
+          expire: accessExpire,
         });
 
         res.status(200).json({
           message: "success login",
-          data: accessToken,
         });
       }
     } catch (error) {
@@ -69,18 +73,41 @@ const login = async (req, res) => {
 };
 
 const refresh = (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
-  console.log(refreshToken);
-  if (!refreshToken) return res.sendStatus(401); // No token provided
-  jwt.verify(refreshToken, config.refreshSecret, (err, user) => {
-    if (err) return res.sendStatus(403); // Invalid token
-    const accessToken = jwt.sign(
-      { username: user.username },
-      config.accessSecret,
-      { expiresIn: "15m" }
-    );
-    res.json({ accessToken });
-  });
+  const Token = req.cookies.refreshToken;
+
+  if (!Token) {
+    res.status(401).json({
+      message: "no refresh token",
+    });
+  }
+
+  try {
+    jwt.verify(Token, config.refreshSecret, function (err, decoded) {
+      if (err) return res.sendStatus(403); // Forbidden
+      const { accessToken, accessExpire } = generateToken(decoded);
+
+      res.clearCookie("accessToken");
+
+      res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        expire: accessExpire,
+      });
+      res.status(200).json({
+        message: "refresh complete",
+        decoded,
+      });
+    });
+  } catch (error) {
+    res.status(400).json({
+      error: error,
+    });
+  }
 };
 
-export { register, login, refresh };
+const logout = (req, res) => {
+  res.clearCookie("accessToken");
+  res.clearCookie("refreshToken");
+  res.send("Logout Success");
+};
+
+export { register, login, refresh, logout };

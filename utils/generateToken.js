@@ -1,7 +1,10 @@
 import jwt from "jsonwebtoken";
 import config from "../config/config.js";
 
-const generateLoginToken = (user) => {
+const generateToken = (user) => {
+  const accessExpire = 900000;
+  const refreshExpire = 7 * 24 * 60 * 60 * 1000;
+
   const accessToken = jwt.sign(
     {
       username: user.username,
@@ -9,7 +12,7 @@ const generateLoginToken = (user) => {
       role: user.role,
     },
     config.accessSecret,
-    { expiresIn: "15m" }
+    { expiresIn: accessExpire }
   );
 
   const refreshToken = jwt.sign(
@@ -19,10 +22,10 @@ const generateLoginToken = (user) => {
       role: user.role,
     },
     config.refreshSecret,
-    { expiresIn: "15m" }
+    { expiresIn: refreshExpire }
   );
 
-  return { accessToken, refreshToken };
+  return { accessToken, refreshToken, accessExpire, refreshExpire };
 };
 
-export { generateLoginToken };
+export { generateToken };
