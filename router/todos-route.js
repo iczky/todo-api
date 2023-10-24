@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
   postTodos,
   updateTodos,
-  deleteTodos,
+  deleteByIdTodos,
   getAllTodos,
   getByIdTodos,
 } from "../service/todos-service.js";
@@ -17,12 +17,12 @@ todosRoute.post("/todos", postTodos);
 todosRoute.put("/todos/:id", updateTodos);
 
 //delete by id
-todosRoute.delete("/todos/:id", authorizationMiddleware, deleteTodos);
+todosRoute.delete("/todos/:id", deleteByIdTodos);
 
 //get by id
 todosRoute.get("/todos/:id", authorizationMiddleware, getByIdTodos);
 
 //get all
-todosRoute.get("/todos", authorizationMiddleware, getAllTodos);
+todosRoute.get("/todos", getAllTodos);
 
 export default todosRoute;

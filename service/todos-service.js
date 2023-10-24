@@ -47,10 +47,14 @@ const updateTodos = async (req, res) => {
 };
 
 //delete by id
-const deleteTodos = async (req, res) => {
+const deleteByIdTodos = async (req, res) => {
   const { id } = req.params;
   try {
-    const todo = await Todo.findByIdAndDelete({ _id: id });
+    const todo = await Todo.findByIdAndUpdate(
+      { _id: id },
+      { isDeleted: true },
+      { new: true }
+    );
     res.status(200).json({
       message: "success",
       data: todo,
@@ -86,13 +90,27 @@ const getByIdTodos = async (req, res) => {
 //get all
 const getAllTodos = async (req, res) => {
   try {
-    const todo = await Todo.find({});
-    console.log(`============Success get all=========`);
+    const userRole = req.user.role;
+    console.log(userRole, `==========userRole========`);
 
-    res.status(200).json({
-      message: "success",
-      data: todo,
-    });
+    if (userRole === "admin") {
+      const todo = await Todo.find({});
+      console.log(`============Success get all=========`);
+
+      res.status(200).json({
+        message: "success",
+        data: todo,
+      });
+    } else {
+      const todo = await Todo.find({
+        createdBy: req.user.id,
+        isDeleted: false,
+      });
+      res.status(200).json({
+        message: "success",
+        data: todo,
+      });
+    }
   } catch (error) {
     console.log(error, `============error==========`);
     res.status(400).json({
@@ -101,4 +119,4 @@ const getAllTodos = async (req, res) => {
   }
 };
 
-export { postTodos, updateTodos, getAllTodos, getByIdTodos, deleteTodos };
+export { postTodos, updateTodos, getAllTodos, getByIdTodos, deleteByIdTodos };
